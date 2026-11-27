@@ -1,0 +1,13 @@
+salary_one:
+  employee: employee_one
+  amount: 75000.00
+  currency_code: INR
+  effective_from: 2025-01-01
+  effective_to: 2025-12-31
+
+salary_two:
+  employee: employee_two
+  amount: 85000.00
+  currency_code: INR
+  effective_from: 2025-01-01
+  effective_to: 2025-12-31

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_27_060631) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_27_104752) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +48,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_27_060631) do
     t.index ["employment_status"], name: "index_employees_on_employment_status"
   end
 
+  create_table "salaries", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.string "currency_code", limit: 3, null: false
+    t.date "effective_from", null: false
+    t.date "effective_to"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["employee_id", "effective_from"], name: "index_salaries_on_employee_id_and_effective_from"
+    t.index ["employee_id"], name: "index_salaries_on_employee_id"
+    t.check_constraint "amount > 0::numeric", name: "salaries_amount_positive"
+    t.check_constraint "currency_code::text ~ '^[A-Z]{3}$'::text", name: "salaries_currency_code_format"
+    t.check_constraint "effective_to IS NULL OR effective_to >= effective_from", name: "salaries_valid_effective_dates"
+  end
+
   add_foreign_key "employees", "countries"
   add_foreign_key "employees", "departments"
+  add_foreign_key "salaries", "employees"
 end
