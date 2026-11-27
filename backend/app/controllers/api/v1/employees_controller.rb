@@ -5,12 +5,14 @@ module Api
       def index
         employees = Employee.all
 
-        status = params[:employment_status].presence || "active"
-        unless Employee::EMPLOYMENT_STATUSES.include?(status)
-          return render json: { error: "Invalid employment status" },
-                        status: :bad_request
+        if params[:employment_status].present?
+          status = params[:employment_status]
+          unless Employee::EMPLOYMENT_STATUSES.include?(status)
+            return render json: { error: "Invalid employment status" },
+                          status: :bad_request
+          end
+          employees = employees.where(employment_status: status)
         end
-        employees = employees.where(employment_status: status)
 
         if params[:search].present?
           search = "%#{params[:search].strip}%"
@@ -113,6 +115,7 @@ module Api
             :email,
             :job_title,
             :employment_status,
+            :last_working_date,
             :country_id,
             :department_id,
             :created_at,
