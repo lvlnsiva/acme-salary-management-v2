@@ -169,6 +169,10 @@ function App() {
         <Metric label="Inactive employees" value={count.inactive ?? '—'} note="Former employees retained" />
       </section>
       {currencyTotals.length > 0 && <section className="panel insights"><div className="panel-title"><div><h2>Current compensation</h2><p className="muted">Grouped by currency. Values are not converted across currencies.</p></div></div><div className="currency-grid">{currencyTotals.map(item => <div className="currency-card" key={item.currency_code}><span>{item.currency_code}</span><b>{Number(item.average_amount || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</b><small>Average · {item.employee_count} employees</small></div>)}</div></section>}
+      {insights && <section className="insight-columns">
+        <InsightsTable title="Average salary by country" rows={insights.salary_by_country || []} />
+        <InsightsTable title="Average salary by department" rows={insights.salary_by_department || []} />
+      </section>}
       <section className="panel">
         <div className="panel-title"><div><h2>Employees</h2><p className="muted">{meta.total_count?.toLocaleString()} records</p></div></div>
         <div className="filters">
