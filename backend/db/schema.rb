@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_27_112824) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_27_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "pg_trgm"
 
   create_table "countries", force: :cascade do |t|
     t.string "name", null: false
@@ -47,6 +48,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_27_112824) do
     t.index ["email"], name: "index_employees_on_email", unique: true
     t.index ["employee_number"], name: "index_employees_on_employee_number", unique: true
     t.index ["employment_status"], name: "index_employees_on_employment_status"
+    t.index ["first_name"], name: "index_employees_on_first_name_trigram", using: :gin, opclass: :gin_trgm_ops
+    t.index ["last_name"], name: "index_employees_on_last_name_trigram", using: :gin, opclass: :gin_trgm_ops
+    t.index ["email"], name: "index_employees_on_email_trigram", using: :gin, opclass: :gin_trgm_ops
+    t.index ["employee_number"], name: "index_employees_on_employee_number_trigram", using: :gin, opclass: :gin_trgm_ops
   end
 
   create_table "salaries", force: :cascade do |t|
