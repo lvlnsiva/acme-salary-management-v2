@@ -1,111 +1,76 @@
-cat > docs/requirements.md <<'EOF'
-# ACME Salary Management — Requirements
+# ACME Salary Management — Product Requirements
 
-## 1. Goal
-Build a maintainable, fully functional web application that enables an HR Manager at ACME to manage salary information for 10,000 employees across multiple countries and understand how the organization pays its employees.
+## Goal and user
 
-## 2. User and Problem
-**Primary user:** HR Manager.
+Build a maintainable application for ACME's HR Manager to manage employee information, salary history, and compensation insights for approximately 10,000 employees across multiple countries.
 
-ACME currently manages salary information for approximately 10,000 employees across multiple countries using Excel spreadsheets. This makes employee information difficult to maintain, search, analyze and report.
+ACME currently relies on spreadsheets. The application centralizes employee and salary records and makes them searchable and reportable.
 
-The application provides a centralized system for managing employees, salary records and salary insights.
+The initial release supports one organization (ACME), not multiple tenants.
 
-**Organization scope:** The initial release supports one organization (ACME) operating across multiple countries. It is not a multi-tenant SaaS product.
+## Scope
 
-## 3. In Scope
-- Employee creation, viewing and updating.
-- Salary management and salary history.
-- Country and department management.
-- Employee search, filtering and server-side pagination.
-- Dashboard with employee and salary insights.
-- Multiple salary currencies.
-- Seed data for 10,000 employees.
-- Rails API, React frontend and PostgreSQL database.
+- Employee creation, viewing, updating, and deletion.
+- Search by employee name, email, and employee number.
+- Filtering by country and department.
+- Server-side pagination.
+- Country and department reference data.
+- Effective-dated salary records and salary history.
+- Compensation insights grouped by country, department, and currency.
+- Seed data representing 10,000 employees.
 
-## 4. Core User Stories
-- As an HR Manager, I can view employees in a paginated list.
-- I can search by name, email or employee number.
-- I can filter employees by country and department.
-- I can view employee details, current salary and salary history.
-- I can add a salary record with an effective date.
-- I can view employee counts and salary insights by country and department.
-- I can understand salary distribution without maintaining Excel spreadsheets.
+## Core user stories
 
-## 5. Functional Requirements
+As an HR Manager, I can:
+- Browse employees without loading the entire dataset into the browser.
+- Find an employee by name, email, or employee number.
+- Filter employees by country and department.
+- View employee details and salary history.
+- Add a salary record with an effective date.
+- Review employee counts and salary averages by country and department.
+
+## Functional rules
 
 ### Employees
-- Each employee has an employee number, name, email, job title, employment status, country and department.
-- Employee number and email must be unique.
-- An employee belongs to one country and one department in the initial version.
-- Search, filtering and pagination are handled by the backend/database.
+
+An employee has an employee number, first name, last name, email, job title, employment status, country, department, and optional last working date.
+
+Employee number and email are unique. Each employee belongs to one country and one department in the initial version. Inactive employees remain in the system for historical and reference enquiries.
+
+Search, filters, and pagination are applied by the backend/database.
 
 ### Salaries
-- An employee can have multiple salary records.
-- Each record contains amount, currency code, effective-from date and effective-to date.
-- Salary amounts cannot be negative.
-- Current salary is determined by its effective period.
-- Salary effective periods for the same employee must not overlap.
 
-### Countries and Departments
-- Countries contain a name and country code.
-- Departments contain a name.
-- Employees are associated with one country and department.
+A salary record contains amount, three-letter currency code, effective-from date, and optional effective-to date.
 
-### Dashboard
-- Employee count by country and department.
-- Average salary by country and department.
-- Salary distribution.
-- Amounts in different currencies must not be combined without a defined conversion strategy.
+Amounts must be greater than zero. The end date cannot precede the start date. Salary periods belonging to the same employee must not overlap. Salary history is retained rather than overwritten.
 
-## 6. Non-Functional Requirements
-- Use Ruby on Rails for the backend API, ReactJS for the frontend and PostgreSQL as the relational database.
-- Maintain readable, modular and maintainable code.
-- Use database constraints and indexes for data integrity and query performance.
-- Avoid N+1 queries and unnecessary data loading.
-- Provide clear API validation and error responses.
-- Include meaningful, deterministic automated tests for core business rules and API functionality.
-- Support at least 10,000 employees without loading all records into the browser.
+Salary reporting must keep currencies separate. The application does not calculate cross-currency averages without an agreed exchange-rate source and conversion policy.
 
-## 7. Out of Scope and Assumptions
-Excluded from the initial release:
-- Multi-tenant SaaS and multiple independent organizations.
-- Payroll processing and bank transfers.
-- Tax calculations and country-specific statutory compliance.
-- Benefits, insurance, loans and settlements.
-- Salary approval workflows.
-- Attendance, leave management and employee self-service.
-- Currency conversion and cross-currency salary aggregation.
-- Complex role-based access control.
+### Insights
 
-Assumptions:
-- ACME is the only organization using the initial application.
-- An employee belongs to one country and one department.
-- An employee can have multiple salary records.
-- Salary currency is stored with each salary record.
-- Complex authentication and authorization are not part of the initial release.
+The intended reporting includes employee counts by country and department and average salary by country and department, grouped by currency. Salary distribution needs a precise business definition before it is treated as an implemented report.
 
-## 8. Deliverables and Success Criteria
-- Working Rails API and React application.
-- PostgreSQL schema and seed script for 10,000 employees.
-- Meaningful automated tests.
-- Deployed application and video demonstration.
-- Incremental Git commits.
-- Supporting documentation for architecture, design decisions, trade-offs, performance and AI-assisted development.
+## Non-functional expectations
 
-The solution is successful when an HR Manager can manage employee information, search and filter 10,000 employees, manage salary records, view salary history and understand salary insights.
+- Readable, maintainable Rails and React code.
+- Database constraints and indexes for important integrity and lookup requirements.
+- Database-side search, filtering, pagination, and aggregation.
+- Bounded API responses and avoidance of N+1 queries.
+- Clear validation and error responses.
+- Fast, deterministic automated tests, including edge cases.
+- Support the assessment dataset without loading all employees into the browser.
 
-## 9. Future Enhancements
+## Deliberate exclusions
 
-### International Employee Transfers
-An employee may move from one country to another while continuing employment with ACME.
+Payroll processing, tax calculations, benefits, insurance, loans, salary approvals, attendance, leave management, employee self-service, currency conversion, complex role-based access control, and multi-tenant SaaS are outside the initial assessment scope.
 
-A future implementation may introduce Employee Assignments to maintain:
-- Country and work-location history.
-- Department and assignment history.
-- Effective start and end dates.
-- Salary changes associated with international transfers.
-- Historical records without creating duplicate employee profiles.
+A production HR deployment would still require appropriate authentication, authorization, audit logging, and protection of sensitive employee and salary information.
 
-**Reason for deferral:** The initial assessment does not explicitly require international transfer workflows. The initial version maintains one country and one department per employee to keep implementation focused.
-EOF
+## Assumptions and future evolution
+
+An employee has one country and one department in the initial model. International transfers are deferred. A future design could introduce effective-dated employee assignments to preserve country, work location, and department history without creating duplicate employee profiles.
+
+## Success criteria
+
+An HR Manager can manage employee records, search and filter the target dataset, view salary history, add salary records, and review currency-aware compensation insights without relying on spreadsheets for those workflows.
