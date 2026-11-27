@@ -1,24 +1,40 @@
-# README
+# Rails API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Requirements
 
-Things you may want to cover:
+- Ruby 3.1.x
+- Bundler
+- PostgreSQL
 
-* Ruby version
+## Setup
 
-* System dependencies
+```bash
+bundle install
+bin/rails db:create
+bin/rails db:migrate
+bin/rails db:seed
+```
 
-* Configuration
+Start the API:
 
-* Database creation
+```bash
+bin/rails server
+```
 
-* Database initialization
+The API is available under `/api/v1`. The root health endpoint is `/up`.
 
-* How to run the test suite
+## Tests
 
-* Services (job queues, cache servers, search engines, etc.)
+```bash
+bin/rails test
+```
 
-* Deployment instructions
+The test suite covers employee CRUD/search/filtering/pagination, salary history and validations, reference data endpoints, and insights response structure.
 
-* ...
+## Seed data
+
+`db/seeds.rb` creates reference countries/departments and 10,000 deterministic demo employees with varied employment statuses and salary histories. Demo employee numbers use the `DEMO-` prefix. Re-running the seed removes and recreates only those demo employees and their salary rows; other employee records are preserved.
+
+## API conventions
+
+Validation failures return HTTP 422 with an `errors` array. Missing records return HTTP 404. Invalid employment status filters return HTTP 400. Employee list responses include pagination metadata.
