@@ -1,9 +1,19 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+
+require_relative "seeds/support"
+require_relative "seeds/reference_data"
+require_relative "seeds/employees"
+require_relative "seeds/salaries"
+
+AcmeSeeds.load_reference_data!
+
+if AcmeSeeds.demo_data_enabled?
+  ActiveRecord::Base.transaction do
+    AcmeSeeds.load_employees!
+    AcmeSeeds.load_salaries!
+  end
+else
+  puts "Demo employee and salary data skipped for #{Rails.env}."
+  puts "Set SEED_DEMO_DATA=true to explicitly enable demo data."
+end
+
+puts "Seed process completed."
