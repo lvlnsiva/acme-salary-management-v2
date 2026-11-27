@@ -14,14 +14,18 @@ module Api
 
       def create
         employee = Employee.find(params[:employee_id])
-        salary = employee.salaries.new(salary_params)
+        salary = nil
 
-        if salary.save
-          render json: { data: salary_json(salary) }, status: :created
-        else
-          render json: { errors: salary.errors.full_messages },
-                 status: :unprocessable_entity
+        employee.with_lock do
+          salary = employee.salaries.new(salary_params)
+
+          unless salary.save
+            return render json: { errors: salary.errors.full_messages },
+                          status: :unprocessable_entity
+          end
         end
+
+        render json: { data: salary_json(salary) }, status: :created
       end
 
       private
