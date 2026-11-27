@@ -4,6 +4,8 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      resources :countries, only: :index
+      resources :departments, only: :index
       resources :employees do
         resources :salaries, only: [:index, :create]
       end
