@@ -1,0 +1,7 @@
+india:
+  name: India
+  country_code: IN
+
+united_states:
+  name: United States
+  country_code: US
