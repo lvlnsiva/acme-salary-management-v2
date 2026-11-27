@@ -4,7 +4,6 @@ module Api
       def index
         today = Date.current
         current_salaries = Salary
-          .joins(:employee)
           .where("salaries.effective_from <= ?", today)
           .where("salaries.effective_to IS NULL OR salaries.effective_to >= ?", today)
 
@@ -43,8 +42,9 @@ module Api
 
       def grouped_salary_summary(scope, association)
         table = association == "departments" ? Department.arel_table : Country.arel_table
+        employee_association = association == "departments" ? :department : :country
         scope
-          .joins(employee: association.to_sym)
+          .joins(employee: employee_association)
           .group(table[:id], table[:name], :currency_code)
           .order(table[:name], :currency_code)
           .pluck(table[:id], table[:name], :currency_code, Arel.sql("COUNT(salaries.id)"), Arel.sql("AVG(salaries.amount)"))
