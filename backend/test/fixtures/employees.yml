@@ -1,0 +1,19 @@
+employee_one:
+  employee_number: EMP0001
+  first_name: John
+  last_name: Smith
+  email: john.smith@example.com
+  job_title: Software Engineer
+  employment_status: active
+  country: india
+  department: engineering
+
+employee_two:
+  employee_number: EMP0002
+  first_name: Priya
+  last_name: Sharma
+  email: priya.sharma@example.com
+  job_title: HR Manager
+  employment_status: active
+  country: india
+  department: human_resources
