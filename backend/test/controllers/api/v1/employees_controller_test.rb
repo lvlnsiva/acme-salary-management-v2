@@ -6,7 +6,7 @@ class Api::V1::EmployeesControllerTest < ActionDispatch::IntegrationTest
     @employee = employees(:employee_one)
   end
 
-  test "returns active employees by default" do
+  test "returns active and inactive employees by default" do
     inactive_employee = Employee.create!(
       employee_number: "EMP0003",
       first_name: "David",
@@ -26,7 +26,7 @@ class Api::V1::EmployeesControllerTest < ActionDispatch::IntegrationTest
     ids = response.parsed_body["data"].map { |employee| employee["id"] }
 
     assert_includes ids, @employee.id
-    assert_not_includes ids, inactive_employee.id
+    assert_includes ids, inactive_employee.id
   end
 
   test "filters employees by employment status" do
