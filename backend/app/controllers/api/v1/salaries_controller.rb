@@ -18,14 +18,15 @@ module Api
 
         employee.with_lock do
           salary = employee.salaries.new(salary_params)
-
-          unless salary.save
-            return render json: { errors: salary.errors.full_messages },
-                          status: :unprocessable_entity
-          end
+          salary.save
         end
 
-        render json: { data: salary_json(salary) }, status: :created
+        if salary.persisted?
+          render json: { data: salary_json(salary) }, status: :created
+        else
+          render json: { errors: salary.errors.full_messages },
+                 status: :unprocessable_entity
+        end
       end
 
       private
