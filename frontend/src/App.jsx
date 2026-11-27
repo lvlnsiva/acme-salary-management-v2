@@ -92,7 +92,7 @@ function App() {
       delete payload.id
       payload.country_id = Number(payload.country_id)
       payload.department_id = Number(payload.department_id)
-      if (!payload.last_working_date) payload.last_working_date = null
+      if (payload.employment_status === 'active' || !payload.last_working_date) payload.last_working_date = null
       await request(editing ? `/employees/${editing}` : '/employees', {
         method: editing ? 'PATCH' : 'POST',
         body: JSON.stringify({ employee: payload }),
@@ -223,6 +223,13 @@ function App() {
   </div>
 }
 
+function InsightsTable({ title, rows }) {
+  return <section className="panel insight-panel"><div className="panel-title"><div><h2>{title}</h2><p className="muted">Grouped by currency</p></div></div>
+    {rows.length === 0 ? <p className="muted insight-empty">No current salary records.</p> : <div className="table-wrap"><table><thead><tr><th>Name</th><th>Currency</th><th>Employees</th><th>Average salary</th></tr></thead><tbody>
+      {rows.map(row => <tr key={`${row.id}-${row.currency_code}`}><td>{row.name}</td><td>{row.currency_code}</td><td>{row.employee_count}</td><td>{Number(row.average_amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>)}
+    </tbody></table></div>}
+  </section>
+}
 function Metric({ label, value, note }) { return <div className="metric"><span>{label}</span><b>{value}</b><small>{note}</small></div> }
 function Field({ label, children }) { return <label className="field"><span>{label}</span>{children}</label> }
 function Detail({ label, value }) { return <div className="detail"><small>{label}</small><b>{value || '—'}</b></div> }
