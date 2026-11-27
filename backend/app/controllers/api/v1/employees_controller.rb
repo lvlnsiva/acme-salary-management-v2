@@ -32,7 +32,7 @@ module Api
         total_count = employees.count
 
         employees = employees
-          .includes(:country, :department)
+          .includes(:country, :department, :salaries)
           .order(:id)
           .limit(per_page)
           .offset((page - 1) * per_page)
@@ -125,6 +125,14 @@ module Api
             country: { only: [:id, :name, :country_code] },
             department: { only: [:id, :name] }
           }
+        )
+
+        current_salary = employee.salaries.find do |salary|
+          salary.effective_from <= Date.current &&
+            (salary.effective_to.nil? || salary.effective_to >= Date.current)
+        end
+        attributes["current_salary"] = current_salary&.as_json(
+          only: [:id, :amount, :currency_code, :effective_from, :effective_to]
         )
 
         if include_salaries
