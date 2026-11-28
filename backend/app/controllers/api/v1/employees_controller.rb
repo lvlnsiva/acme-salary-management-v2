@@ -60,20 +60,39 @@ module Api
         if employee.save
           render json: employee_json(employee), status: :created
         else
-          render json: { errors: employee.errors.full_messages },
-                 status: :unprocessable_entity
+          status = duplicate_employee?(employee) ? :conflict : :unprocessable_entity
+          render json: { errors: employee.errors.full_messages }, status: status
         end
+      rescue ActiveRecord::RecordNotUnique
+        render json: {
+          error: "An employee with this employee number or email already exists."
+        }, status: :conflict
       end
 
       def update
         employee = Employee.find(params[:id])
+        attributes = employee_params
 
-        if employee.update(employee_params)
+        unless attributes.key?(:lock_version)
+          return render json: {
+            error: "lock_version is required when updating an employee."
+          }, status: :bad_request
+        end
+
+        if employee.update(attributes)
           render json: employee_json(employee)
         else
-          render json: { errors: employee.errors.full_messages },
-                 status: :unprocessable_entity
+          status = duplicate_employee?(employee) ? :conflict : :unprocessable_entity
+          render json: { errors: employee.errors.full_messages }, status: status
         end
+      rescue ActiveRecord::StaleObjectError
+        render json: {
+          error: "This employee was updated by another user. Please refresh and try again."
+        }, status: :conflict
+      rescue ActiveRecord::RecordNotUnique
+        render json: {
+          error: "An employee with this employee number or email already exists."
+        }, status: :conflict
       end
 
       def destroy
@@ -99,7 +118,8 @@ module Api
           :department_id,
           :job_title,
           :employment_status,
-          :last_working_date
+          :last_working_date,
+          :lock_version
         )
       end
 
@@ -116,7 +136,8 @@ module Api
             :country_id,
             :department_id,
             :created_at,
-            :updated_at
+            :updated_at,
+            :lock_version
           ],
           include: {
             country: { only: [:id, :name, :country_code] },
@@ -139,6 +160,14 @@ module Api
         end
 
         attributes
+      end
+
+      def duplicate_employee?(employee)
+        %i[employee_number email].any? do |attribute|
+          employee.errors.details[attribute].any? do |error|
+            error[:error] == :taken
+          end
+        end
       end
 
       def pagination_value(parameter, default, minimum:, maximum: nil)

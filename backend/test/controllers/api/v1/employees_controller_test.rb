@@ -148,11 +148,15 @@ class Api::V1::EmployeesControllerTest < ActionDispatch::IntegrationTest
 
   test "updates an employee" do
     patch "/api/v1/employees/#{@employee.id}", params: {
-      employee: { job_title: "Senior Engineer" }
+      employee: {
+        job_title: "Senior Engineer",
+        lock_version: @employee.lock_version
+      }
     }
 
     assert_response :success
     assert_equal "Senior Engineer", @employee.reload.job_title
+    assert_equal 1, @employee.reload.lock_version
   end
 
   test "deletes an employee without salary history" do
@@ -180,5 +184,61 @@ class Api::V1::EmployeesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
+  end
+
+  test "rejects an update using an outdated lock version" do
+    original_version = @employee.lock_version
+
+    patch "/api/v1/employees/#{@employee.id}", params: {
+      employee: {
+        job_title: "Updated by HR User A",
+        lock_version: original_version
+      }
+    }
+
+    assert_response :success
+
+    patch "/api/v1/employees/#{@employee.id}", params: {
+      employee: {
+        job_title: "Updated by HR User B",
+        lock_version: original_version
+      }
+    }
+
+    assert_response :conflict
+    assert_equal "Updated by HR User A", @employee.reload.job_title
+  end
+
+  test "rejects updating an employee with another employee's email" do
+    another_employee = employees(:employee_two)
+
+    patch "/api/v1/employees/#{@employee.id}", params: {
+      employee: {
+        email: another_employee.email,
+        lock_version: @employee.lock_version
+      }
+    }
+
+    assert_response :conflict
+    assert_not_equal another_employee.email, @employee.reload.email
+  end
+
+  test "rejects creating an employee with an existing employee number" do
+    assert_no_difference("Employee.count") do
+      post "/api/v1/employees", params: {
+        employee: {
+          employee_number: @employee.employee_number,
+          first_name: "Duplicate",
+          last_name: "Employee",
+          email: "duplicate@example.com",
+          job_title: "Developer",
+          employment_status: "active",
+          country_id: countries(:india).id,
+          department_id: departments(:engineering).id
+        }
+      }
+    end
+
+    assert_response :conflict
   end
 end
